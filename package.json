@@ -1,0 +1,16 @@
+{
+  "name": "nginx-spa-docker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/navikt/nginx-spa-docker.git",
+  "author": "NAV",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "test": "mocha-webpack  --webpack-config webpack/webpack.test.js \"packages/**/*.spec.jsx\"",
+    "build:base": "docker build -t nginx-spa-docker-base . --build-arg HTTP_PROXY=$HTTP_PROXY --build-arg HTTPS_PROXY=$HTTP_PROXY",
+    "build:test": "docker build -t $npm_package_name ./tests",
+    "start": "yarn stop; yarn build:base; yarn build:test; docker run -d --env-file=.env --name $npm_package_name --net=host $npm_package_name",
+    "stop": "docker stop $npm_package_name; docker rm $npm_package_name"
+  }
+}

@@ -113,6 +113,12 @@ server {
         try_files $uri @rewrites;
     }
 
+    # The Callback path should allways be
+    location "${APP_CALLBACK_PATH}" {
+        access_by_lua_file oidc_access.lua;
+        try_files $uri @rewrites;
+    }
+
     # If no asset matches, send it to your javascript app. Hopefully it's a route in the app!
     location @rewrites {
         rewrite ^(.+)$ "${APP_PATH_PREFIX}index.html" last;
