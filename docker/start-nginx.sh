@@ -12,6 +12,7 @@ then
     done
 fi
 
+export APP_CALLBACK_PATH="${APP_CALLBACK_PATH:-/oauth2-callback-url}"
 export APP_DIR="${APP_DIR:-/app}"
 export APP_HOSTNAME="${HOSTNAME:-localhost}"
 export APP_NAME="${APP_NAME:-devimg}"
@@ -21,7 +22,6 @@ export REDIS_HOST="${REDIS_HOST:-0.0.0.0}"
 export REDIS_PORT="${REDIS_PORT:-6379}"
 export RESOLVER=$(cat /etc/resolv.conf | grep -v '^#' | grep -m 1 nameserver | awk '{print $2}') # Picking the first nameserver.
 export SESSION_STORAGE="${SESSION_STORAGE:-redis}"
-
 
 echo "Prefix:" $APP_PATH_PREFIX " Session Storage:" ${SESSION_STORAGE} " Resolver:" ${RESOLVER} " App version:" ${APP_VERSION}
 
