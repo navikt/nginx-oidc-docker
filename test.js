@@ -1,12 +1,20 @@
 const assert = require('assert');
 const url = require('url');
 require('dotenv').config();
+const request = require('request-promise-native');
+/**
+ * Some configuration
+ */
 const baseUrl = 'http://localhost:' + process.env.APP_PORT;
 const appUrl = baseUrl + process.env.APP_PATH_PREFIX;
 const itsAliveUrl = appUrl + '/health/is-alive';
 const assetUrl = appUrl + '/logo.svg';
 const dummyProtectedRoute = appUrl + '/dummy';
-const request = require('request-promise-native');
+
+const proxyBehindProtectionUrl = baseUrl +
+    '/some-prefix-for-proxy-behind-protection/dummy';
+const proxyWithoutProtection = baseUrl +
+    '/some-prefix-for-proxy-without-protection/dummy';
 
 describe('Basic testing uten innlogging', function() {
 
@@ -48,29 +56,37 @@ describe('Basic testing uten innlogging', function() {
     assert.strictEqual(response.headers['cache-control'],
         'max-age=31536000, public');
   });
-
+  it('innhold bak proxy skal komme igjennom', async () => {
+    const parsedURL = url.parse(proxyWithoutProtection, true);
+    const response = await testAgent.get(proxyWithoutProtection);
+    const body = JSON.parse(response.body);
+    assert.strictEqual(body.path, parsedURL.path);
+  });
 });
 
 describe('Innlogging', function() {
-  it('innlogging skal fungere', async () => {
-    const cookieJar = request.jar();
-    const testAgent = request.defaults({
-      timeout: 1000,
-      jar: cookieJar,
-      resolveWithFullResponse: true,
-      followAllRedirects: true,
-    });
-
+  let loginResp;
+  const cookieJar = request.jar();
+  const testAgent = request.defaults({
+    timeout: 1000,
+    jar: cookieJar,
+    resolveWithFullResponse: true,
+    followAllRedirects: true,
+    simple: false,
+  });
+  before(async function() {
     const startResp = await testAgent.get(dummyProtectedRoute);
     const loginPageUrl = startResp.request.uri.href + '/login';
-
-    const loginResp = await testAgent.post(loginPageUrl, {
+    loginResp = await testAgent.post(loginPageUrl, {
       form: {
         email: 'sim@qlik.example',
         password: 'Password1!',
         submit: true,
       },
     });
+  });
+
+  it('innlogging skal fungere', async () => {
     /**
      * Skal gi 200 på ruten
      */
@@ -84,15 +100,16 @@ describe('Innlogging', function() {
      */
     assert.ok(loginResp.headers['set-cookie'][0]);
     assert.ok(loginResp.headers['set-cookie'][0].startsWith('ID_token='));
-    //console.log('request.headers:', loginResp.request.headers);
-    console.log('response.headers:', loginResp.headers);
-
-    /*
-    const loginLoc = url.parse(startResp.headers.location, true);
-    console.log(startResp);
-    //loginLoc.host = "localhost";
-    const loginServiceResp = await axios.get(loginLoc);
-    console.log(loginServiceResp.headers.location);
-    */
+    // console.log('request.headers:', loginResp.request.headers);
+    // console.log('response.headers:', loginResp.headers);
   });
+
+  it('innhold bak proxy skal komme igjennom med ID_token', async () => {
+    const parsedURL = url.parse(proxyBehindProtectionUrl, true);
+    const response = await testAgent.get(proxyBehindProtectionUrl);
+    const body = JSON.parse(response.body);
+    assert.strictEqual(body.path, parsedURL.path);
+    assert.ok(body.headers.cookie.startsWith('ID_token='));
+  });
+
 });

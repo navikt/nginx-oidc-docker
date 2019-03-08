@@ -1,0 +1,10 @@
+# Simple Proxy to backend
+location  /some-prefix-for-proxy-behind-protection {
+    access_by_lua_file oidc_protected.lua;
+    proxy_pass http://echo-server;
+}
+
+# Simple Proxy to backend
+location  /some-prefix-for-proxy-without-protection {
+    proxy_pass http://echo-server;
+}

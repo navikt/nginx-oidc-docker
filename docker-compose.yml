@@ -9,7 +9,7 @@ services:
     links:
       - redis
     volumes:
-      - ./locations:/app/nginx
+      - ./tests/locations:/nginx
       - ./tests/dist:/app/test-prefix
   redis:
     image: redis
@@ -20,4 +20,7 @@ services:
     environment:
       - REDIRECTS=http://localhost:8012/oidc-callback-path
       - PORT=4352
-      #- IDP_NAME=http://host.docker.internal:4352
+  echo-server:
+    image: mendhak/http-https-echo
+    ports:
+      - 3340:80
