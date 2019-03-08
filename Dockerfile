@@ -5,20 +5,19 @@ LABEL maintainer="teamforeldrepenger"
 ENV APP_DIR="/app" \
     USER="root"
 
-RUN apk add --no-cache bash gettext libintl
-RUN ["luarocks", "install", "lua-resty-session"]
-RUN ["luarocks", "install", "lua-resty-http"]
-RUN ["luarocks", "install", "lua-resty-jwt"]
-RUN ["luarocks", "install", "lua-resty-openidc"]
+# Installing the dependencies
+RUN apk add --no-cache --update bash gettext libintl openssl \
+    && luarocks install lua-resty-session \
+    && luarocks install lua-resty-http \
+    && luarocks install lua-resty-jwt \
+    && luarocks install lua-resty-openidc
 
-COPY docker/openidc.lua          /usr/local/openresty/lualib/resty/
-COPY docker/default-config.nginx /etc/nginx/conf.d/app.conf.template
-COPY docker/oidc_access.lua      /usr/local/openresty/nginx/
-COPY docker/start-nginx.sh       /usr/sbin/start-nginx
+# Copying over the config-files.
+COPY files/default-config.nginx     /etc/nginx/conf.d/app.conf.template
+COPY files/oidc_protected.lua   /usr/local/openresty/nginx/
+COPY files/start-nginx.sh           /usr/sbin/start-nginx
 RUN chmod u+x /usr/sbin/start-nginx
 RUN mkdir -p /nginx
-
-
 
 EXPOSE 9000 8012 443
 

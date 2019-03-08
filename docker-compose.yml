@@ -1,0 +1,23 @@
+version: '3'
+services:
+  frontend:
+    build: .
+    ports:
+      - 8012:8012
+    env_file:
+      - .env
+    links:
+      - redis
+    volumes:
+      - ./locations:/app/nginx
+      - ./tests/dist:/app/test-prefix
+  redis:
+    image: redis
+  oidc-provider:
+    image: qlik/simple-oidc-provider
+    ports:
+      - 4352:4352
+    environment:
+      - REDIRECTS=http://localhost:8012/oidc-callback-path
+      - PORT=4352
+      #- IDP_NAME=http://host.docker.internal:4352
