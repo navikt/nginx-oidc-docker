@@ -7,17 +7,16 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "test": "mocha-webpack  --webpack-config webpack/webpack.test.js \"packages/**/*.spec.jsx\"",
-    "build:base": "docker build -t nginx-spa-docker-base . --build-arg HTTP_PROXY=$HTTP_PROXY --build-arg HTTPS_PROXY=$HTTP_PROXY",
-    "build:test": "yarn build:base; docker build -t $npm_package_name ./tests",
-    "start": "yarn stop; yarn build:test; docker run -d --env-file=.env --name $npm_package_name -p 8012:8012 $npm_package_name",
-    "stop": "docker stop $npm_package_name; docker rm $npm_package_name",
-    "redis": "docker stop redis; docker rm redis; docker run --name redis -p 6379:6379 -d redis"
+    "test": "yarn up; mocha",
+    "build": "docker build -t navikt/nginx-spa-docker . --build-arg HTTP_PROXY=$HTTP_PROXY --build-arg HTTPS_PROXY=$HTTP_PROXY",
+    "down": "docker-compose down",
+    "up": "docker-compose up --build -d"
   },
   "dependencies": {
     "dotenv": "^6.2.0",
     "mocha": "^6.0.2",
     "request": "^2.88.0",
-    "request-promise-native": "^1.0.7"
+    "request-promise-native": "^1.0.7",
+    "wait-on": "^3.2.0"
   }
 }

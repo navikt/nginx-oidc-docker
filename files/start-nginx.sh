@@ -13,11 +13,11 @@ then
 fi
 
 # Setting default environment variables
-export APP_CALLBACK_PATH="${APP_CALLBACK_PATH:-/oidc-callback-path}"
+export APP_CALLBACK_PATH="${APP_CALLBACK_PATH:-/callback}"
 export APP_DIR="${APP_DIR:-/app}"
 export APP_HOSTNAME="${HOSTNAME:-localhost}"
 export APP_NAME="${APP_NAME:-devimg}"
-export APP_PATH_PREFIX="${APP_PATH_PREFIX:-/path-prefix}"
+export APP_PATH_PREFIX="${APP_PATH_PREFIX:-/app-prefix}"
 export APP_PORT="${APP_PORT:-443}"
 export APP_VERSION="${APP_VERSION:-localhost}"
 export REDIS_HOST="${REDIS_HOST:-0.0.0.0}"

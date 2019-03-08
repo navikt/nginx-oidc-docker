@@ -117,7 +117,6 @@ server {
     # The Callback path should allways be
     location "${APP_CALLBACK_PATH}" {
         access_by_lua_file oidc_protected.lua;
-        #try_files $uri @rewrites;
     }
 
     # If no asset matches, send it to your javascript app. Hopefully it's a route in the app!

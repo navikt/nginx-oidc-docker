@@ -9,8 +9,8 @@ services:
     links:
       - redis
     volumes:
-      - ./tests/locations:/nginx
-      - ./tests/dist:/app/test-prefix
+      - ./test/locations:/nginx
+      - ./test/dist:/app/test-prefix
   redis:
     image: redis
   oidc-provider:
@@ -18,7 +18,7 @@ services:
     ports:
       - 4352:4352
     environment:
-      - REDIRECTS=http://localhost:8012/oidc-callback-path
+      - REDIRECTS=http://localhost:8012/callback
       - PORT=4352
   echo-server:
     image: mendhak/http-https-echo

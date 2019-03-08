@@ -1,20 +1,34 @@
 const assert = require('assert');
 const url = require('url');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '..','.env') });
 const request = require('request-promise-native');
+const waitOn = require('wait-on');
+
 /**
  * Some configuration
  */
 const baseUrl = 'http://localhost:' + process.env.APP_PORT;
+const appPrefix = process.env.APP_PATH_PREFIX;
 const appUrl = baseUrl + process.env.APP_PATH_PREFIX;
+const oidcAgent = process.env.OIDC_AGENTNAME;
 const itsAliveUrl = appUrl + '/health/is-alive';
 const assetUrl = appUrl + '/logo.svg';
 const dummyProtectedRoute = appUrl + '/dummy';
-
 const proxyBehindProtectionUrl = baseUrl +
     '/some-prefix-for-proxy-behind-protection/dummy';
 const proxyWithoutProtection = baseUrl +
     '/some-prefix-for-proxy-without-protection/dummy';
+const waitOnOpts = {
+  resources: [
+    itsAliveUrl,
+    'http://localhost:4352/.well-known/openid-configuration',
+  ],
+  interval: 500,
+  timeout: 5000,
+  followAllRedirects: false,
+  followRedirect: false
+};
 
 describe('Basic testing uten innlogging', function() {
 
@@ -23,6 +37,16 @@ describe('Basic testing uten innlogging', function() {
     resolveWithFullResponse: true,
     followRedirect: false,
     simple: false,
+  });
+
+  before(async function() {
+    this.timeout(waitOnOpts.timeout);
+    try {
+      await waitOn(waitOnOpts);
+      // once here, all resources are available
+    } catch (err) {
+      console.error(err);
+    }
   });
 
   it('its-alive ruten skal fungere uten innlogging', async () => {
@@ -34,7 +58,7 @@ describe('Basic testing uten innlogging', function() {
     const response = await testAgent.get(baseUrl);
     assert.strictEqual(response.statusCode, 301);
     assert.ok(
-        response.headers.location.startsWith(process.env.APP_PATH_PREFIX));
+        response.headers.location.startsWith(appPrefix));
   });
 
   it('en route skal redirecte til openidc', async () => {
@@ -42,7 +66,7 @@ describe('Basic testing uten innlogging', function() {
     assert.strictEqual(response.statusCode, 302);
     assert.ok(response.headers['set-cookie'][0].startsWith('session='));
     const parsedURL = url.parse(response.headers.location, true);
-    assert.strictEqual(parsedURL.query.client_id, process.env.OIDC_AGENTNAME);
+    assert.strictEqual(parsedURL.query.client_id, oidcAgent);
   });
 
   it('statiske ressurser skal fungere uten innlogging', async () => {
@@ -56,6 +80,7 @@ describe('Basic testing uten innlogging', function() {
     assert.strictEqual(response.headers['cache-control'],
         'max-age=31536000, public');
   });
+
   it('innhold bak proxy skal komme igjennom', async () => {
     const parsedURL = url.parse(proxyWithoutProtection, true);
     const response = await testAgent.get(proxyWithoutProtection);
@@ -71,12 +96,17 @@ describe('Innlogging', function() {
     timeout: 1000,
     jar: cookieJar,
     resolveWithFullResponse: true,
+    followRedirect:true,
     followAllRedirects: true,
     simple: false,
   });
+
   before(async function() {
+    this.timeout(waitOnOpts.timeout);
+    await waitOn(waitOnOpts);
     const startResp = await testAgent.get(dummyProtectedRoute);
     const loginPageUrl = startResp.request.uri.href + '/login';
+
     loginResp = await testAgent.post(loginPageUrl, {
       form: {
         email: 'sim@qlik.example',
@@ -87,6 +117,7 @@ describe('Innlogging', function() {
   });
 
   it('innlogging skal fungere', async () => {
+
     /**
      * Skal gi 200 på ruten
      */
