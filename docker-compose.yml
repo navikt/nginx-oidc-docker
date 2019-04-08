@@ -1,6 +1,6 @@
 version: '3'
 services:
-  frontend:
+  nginx:
     build: .
     ports:
       - 8012:8012

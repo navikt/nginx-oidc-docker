@@ -1,12 +1,14 @@
 version: 2
 jobs:
   build:
-    docker:
-      - image: circleci/node:latest
+    machine: true
     working_directory: ~/repo
     steps:
+      - command: |
+          sudo echo '127.0.0.1 oidc-provider' >> /etc/hosts
       - checkout
-      - setup_remote_docker
+      #- setup_remote_docker
+      #    docker_layer_caching: true
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
