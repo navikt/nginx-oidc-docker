@@ -10,13 +10,6 @@ jobs:
           command: |
             echo 127.0.0.1 oidc-provider | sudo tee -a /etc/hosts
             cat /etc/hosts
-      - run:
-          name: Upgrade Nodejs
-          command: |
-            export NVM_DIR="/opt/circleci/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm install node && nvm use node
-            node -v
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
@@ -32,5 +25,15 @@ jobs:
           export NVM_DIR="/opt/circleci/.nvm"
           [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
           nvm install node && nvm use node
-          node -v
           node ./node_modules/.bin/mocha
+      - deploy:
+          command: |
+            export IMAGE=navikt/nginx-oidc-docker
+            export VERSION=v$(date "+%Y%m%d")
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
+              docker build -t ${IMAGE}:${VERSION} .
+              docker tag      ${IMAGE}:${VERSION} ${IMAGE}:latest
+              docker push     ${IMAGE}:${VERSION}
+              docker push     ${IMAGE}:latest
+            fi

@@ -1,7 +1,7 @@
 const assert = require('assert');
 const url = require('url');
 const path = require('path');
-require('dotenv').config({path: path.resolve(__dirname, '..', 'test.env')});
+require('dotenv').config({path: path.resolve(__dirname, 'test.env')});
 const request = require('request-promise-native');
 const waitOn = require('wait-on');
 

@@ -5,7 +5,7 @@ services:
     ports:
       - 8012:8012
     env_file:
-      - test.env
+      - ./test/test.env
     links:
       - redis
     volumes:
