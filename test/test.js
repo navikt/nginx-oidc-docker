@@ -1,7 +1,7 @@
 const assert = require('assert');
 const url = require('url');
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '..','.env') });
+require('dotenv').config({path: path.resolve(__dirname, '..', 'test.env')});
 const request = require('request-promise-native');
 const waitOn = require('wait-on');
 
@@ -24,10 +24,10 @@ const waitOnOpts = {
     itsAliveUrl,
     'http://localhost:4352/.well-known/openid-configuration',
   ],
-  interval: 500,
+  interval: 1000,
   timeout: 5000,
   followAllRedirects: false,
-  followRedirect: false
+  followRedirect: false,
 };
 
 describe('Basic testing uten innlogging', function() {
@@ -46,6 +46,7 @@ describe('Basic testing uten innlogging', function() {
       // once here, all resources are available
     } catch (err) {
       console.error(err);
+      process.exit(1);
     }
   });
 
@@ -96,7 +97,7 @@ describe('Innlogging', function() {
     timeout: 1000,
     jar: cookieJar,
     resolveWithFullResponse: true,
-    followRedirect:true,
+    followRedirect: true,
     followAllRedirects: true,
     simple: false,
   });
