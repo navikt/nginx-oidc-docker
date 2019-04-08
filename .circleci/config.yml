@@ -10,16 +10,15 @@ jobs:
           command: |
             echo 127.0.0.1 oidc-provider | sudo tee -a /etc/hosts
             cat /etc/hosts
-      #- setup_remote_docker
-      #    docker_layer_caching: true
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
-      - run: yarn install
+      - run: docker-compose up --build -d
+      - run: npm install
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-      - run: yarn test
+      - run: npm run mocha

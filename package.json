@@ -8,6 +8,7 @@
   "private": false,
   "scripts": {
     "test": "yarn up; mocha",
+    "mocha": "mocha",
     "build": "docker build -t navikt/nginx-spa-docker . --build-arg HTTP_PROXY=$HTTP_PROXY --build-arg HTTPS_PROXY=$HTTP_PROXY",
     "down": "docker-compose down",
     "up": "docker-compose up --build -d"
