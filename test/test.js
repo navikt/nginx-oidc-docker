@@ -1,7 +1,7 @@
 const assert = require('assert');
 const url = require('url');
 const path = require('path');
-require('dotenv').config({path: path.resolve(__dirname, '..', 'test.env')});
+require('dotenv').config({path: path.resolve(__dirname, 'test.env')});
 const request = require('request-promise-native');
 const waitOn = require('wait-on');
 
@@ -25,7 +25,7 @@ const waitOnOpts = {
     'http://localhost:4352/.well-known/openid-configuration',
   ],
   interval: 1000,
-  timeout: 5000,
+  timeout: 20000,
   followAllRedirects: false,
   followRedirect: false,
 };

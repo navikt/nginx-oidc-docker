@@ -1,20 +1,39 @@
 version: 2
 jobs:
   build:
-    docker:
-      - image: circleci/node:latest
+    machine: true
     working_directory: ~/repo
     steps:
       - checkout
-      - setup_remote_docker
+      - run:
+          name: Update host file
+          command: |
+            echo 127.0.0.1 oidc-provider | sudo tee -a /etc/hosts
+            cat /etc/hosts
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
-      - run: yarn install
+      - run: docker-compose up --build -d
+      - run: npm install
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-      - run: yarn test
+      - run: |
+          export NVM_DIR="/opt/circleci/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm install node && nvm use node
+          node ./node_modules/.bin/mocha
+      - deploy:
+          command: |
+            export IMAGE=navikt/nginx-oidc-docker
+            export VERSION=v$(date "+%Y%m%d")
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
+              docker build -t ${IMAGE}:${VERSION} .
+              docker tag      ${IMAGE}:${VERSION} ${IMAGE}:latest
+              docker push     ${IMAGE}:${VERSION}
+              docker push     ${IMAGE}:latest
+            fi
