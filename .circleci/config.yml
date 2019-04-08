@@ -6,9 +6,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Fixing hostfile
+          name: Update host file
           command: |
-            sudo echo '127.0.0.1 oidc-provider' >> /etc/hosts
+            echo 127.0.0.1 oidc-provider | sudo tee -a /etc/hosts
+            cat /etc/hosts
       #- setup_remote_docker
       #    docker_layer_caching: true
       - restore_cache:
