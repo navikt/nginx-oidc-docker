@@ -25,7 +25,7 @@ const waitOnOpts = {
     'http://localhost:4352/.well-known/openid-configuration',
   ],
   interval: 1000,
-  timeout: 5000,
+  timeout: 20000,
   followAllRedirects: false,
   followRedirect: false,
 };
