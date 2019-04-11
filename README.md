@@ -1,9 +1,7 @@
-# nginx-spa-docker
-Docker image to serve single page applications with open id connect auth and proxy settings.
-
+# nginx-oidc
+Docker image to serve single page applications with open id connect authentication and proxy settings.
 
 ## Configuration
-
 
 ### Environment variables
 |Name              |Default value| Comment                                                  |
@@ -42,18 +40,9 @@ location  /some-prefix-for-proxy-without-protection {
 To protect routes add the line `access_by_lua_file oidc_protected.lua;` to the block you want
 to protect.
 
-## Testing
-I use node, mocha and request to perform test. For testing create a .env file at 
-the root of the project containing theese variables.
-
-```
-APP_PORT=8012
-REDIS_HOST=redis
-OIDC_AGENTNAME=foo
-OIDC_PASSWORD=bar
-OIDC_HOST_URL=http://host.docker.internal:4352
-APP_PATH_PREFIX=/test-prefix
-```
+## Testing and development
+I use nodejs, mocha and request to perform tests against the image. Simply run `yarn install` in
+the project root, and `yarn test` to perform tests.
 
 To test on Docker for mac I use a little "trick" to get OIDC play well with 
 `docker-compose`. Simply add `127.0.0.1 host.docker.internal` to the 
@@ -64,8 +53,11 @@ localhost. Alternatively you could add the internal service name to your hostfil
 The bonus however is that this "trick" can be reused giving you a kind of 
 `--network=host` for mac.
 
+Or you could do `echo 127.0.0.1 oidc-provider | sudo tee -a /etc/hosts`. As we
+do in the pipeline.
+
 ```
-yarn up
+yarn install
 yarn test
 ```
 

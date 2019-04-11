@@ -1,15 +1,13 @@
 {
-  "name": "nginx-spa-docker",
-  "version": "1.0.0",
-  "main": "index.js",
-  "repository": "https://github.com/navikt/nginx-spa-docker.git",
+  "name": "nginx-oidc-docker",
+  "repository": "https://github.com/navikt/nginx-oidc-docker.git",
   "author": "NAV",
   "license": "MIT",
   "private": false,
   "scripts": {
     "test": "yarn up; mocha",
     "mocha": "mocha",
-    "build": "docker build -t navikt/nginx-spa-docker . --build-arg HTTP_PROXY=$HTTP_PROXY --build-arg HTTPS_PROXY=$HTTP_PROXY",
+    "build": "docker build -t navikt/nginx-oidc .",
     "down": "docker-compose down",
     "up": "docker-compose up --build -d"
   },
