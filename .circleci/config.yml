@@ -28,7 +28,7 @@ jobs:
           node ./node_modules/.bin/mocha
       - deploy:
           command: |
-            export IMAGE=navikt/nginx-oidc-docker
+            export IMAGE=navikt/nginx-oidc
             export VERSION=v$(date "+%Y%m%d")
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
