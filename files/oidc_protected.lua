@@ -4,7 +4,7 @@ local is_authorized = false;
 local cookies_to_set = {};
 local proxy_cookie = {}
 
-if ngx.var.host == "localhost" or ngx.var.host == "fpsak-frontend" then
+if ngx.var.host == "localhost" or ngx.var.host == "frontend" then
     ngx.var.app_baseurl = "http://" .. ngx.var.host .. ":" .. ngx.var.server_port
     local openidc = require("resty.openidc")
     openidc.set_logging(nil, { DEBUG = ngx.INFO })
