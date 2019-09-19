@@ -1,39 +1,62 @@
-version: 2
+version: 2.1
 jobs:
-  build:
-    machine: true
+  test:
+    machine:
+      docker_layer_caching: true
     working_directory: ~/repo
     steps:
       - checkout
       - run:
-          name: Update host file
-          command: |
-            echo 127.0.0.1 oidc-provider | sudo tee -a /etc/hosts
-            cat /etc/hosts
+          name: Getting up test containers
+          command: docker-compose up --build -d
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
-      - run: docker-compose up --build -d
-      - run: npm install
+      - run:
+          name: Install packages for test
+          command: npm install
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-      - run: |
-          export NVM_DIR="/opt/circleci/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-          nvm install node && nvm use node
-          node ./node_modules/.bin/mocha
-      - deploy:
+      - run:
+          name: Start mocha test runner
+          command: |
+            export NVM_DIR="/opt/circleci/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install node && nvm use node
+            npm run mocha
+
+  deploy:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name:
           command: |
             export IMAGE=navikt/nginx-oidc
             export VERSION=v$(date "+%Y%m%d")
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USER" --password-stdin
-              docker build -t ${IMAGE}:${VERSION} .
-              docker tag      ${IMAGE}:${VERSION} ${IMAGE}:latest
-              docker push     ${IMAGE}:${VERSION}
-              docker push     ${IMAGE}:latest
-            fi
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_LOGIN" --password-stdin
+            docker build -t ${IMAGE}:${VERSION} .
+            docker tag      ${IMAGE}:${VERSION} ${IMAGE}:latest
+            docker push     ${IMAGE}:${VERSION}
+            docker push     ${IMAGE}:latest
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - test
+      - deploy:
+          context: NAIS deployment
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
