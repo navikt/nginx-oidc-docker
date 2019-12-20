@@ -1,5 +1,5 @@
 FROM openresty/openresty:alpine-fat
-LABEL maintainer="teamforeldrepenger"
+LABEL maintainer="teamtag"
 
 # User env var is needed for luarocks to not complain.
 ENV APP_DIR="/app" \
